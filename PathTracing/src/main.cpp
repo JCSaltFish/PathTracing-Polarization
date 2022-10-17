@@ -2577,6 +2577,8 @@ void Display()
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glUseProgram(quadShader);
+		int channel_loc = glGetUniformLocation(quadShader, "channel");
+		glUniform1i(channel_loc, channel);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, frameTex);
 		int fbo_tex_loc = glGetUniformLocation(quadShader, "tex");
