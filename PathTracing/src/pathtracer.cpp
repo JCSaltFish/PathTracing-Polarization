@@ -8,8 +8,12 @@
 
 #include "pathtracer.h"
 
+#include "cudakernel.cuh"
+
 PathTracer::PathTracer() : mRng(std::random_device()())
 {
+	mBvh = 0;
+
 	mOutImg = 0;
 	mTotalImg = 0;
 	mMaxDepth = 3;
@@ -209,6 +213,8 @@ void PathTracer::ClearScene()
 	if (mTotalImg)
 		delete[] mTotalImg;
 	mTotalImg = 0;
+
+	CUDAReset();
 }
 
 void PathTracer::SetOutImage(GLubyte* out)
@@ -482,6 +488,44 @@ const glm::vec3 PathTracer::CalculatePolarResult(const glm::vec3& initDir, const
 	phi = acos(glm::dot(s_cam, s)) * glm::sign(glm::dot(glm::cross(s, s_cam), initDir));
 
 	return GetRotationMatrix(phi) * res;
+}
+
+void PathTracer::CUDAInit()
+{
+	InitCUDA();
+	CUDASetResolution(mResolution.x, mResolution.y);
+	CUDASetTraceDepth(mMaxDepth);
+	float pos[3]{ mCamPos.x, mCamPos.y, mCamPos.z };
+	float dir[3]{ mCamDir.x, mCamDir.y, mCamDir.z };
+	float up[3]{ mCamUp.x, mCamUp.y, mCamUp.z };
+	CUDASetCamera(pos, dir, up);
+	CUDASetProjection(mCamFocal, mCamFovy);
+}
+
+void PathTracer::BuildGPUScene()
+{
+	for (auto& t : mTriangles)
+		t.material = mLoadedObjects[t.objectId].elements[t.elementId].material;
+
+	BuildBVH();
+	std::vector<GPUBVHNode> bvh;
+	mBvh->GetGPULayout(bvh);
+	CUDASetBVH(bvh.data(), bvh.size());
+
+	CUDALoadTextures(mLoadedTextures);
+}
+
+void PathTracer::CUDARender(float* img, float* data)
+{
+	if (mNeedReset)
+	{
+		mNeedReset = false;
+		mSamples = 0;
+	}
+
+	mSamples++;
+
+	CUDARenderFrame(mResolution.x, mResolution.y, img, data, mSamples);
 }
 
 void PathTracer::RenderFrame()

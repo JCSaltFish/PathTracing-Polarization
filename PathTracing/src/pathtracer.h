@@ -10,29 +10,6 @@
 
 #include "mesh.h"
 
-enum class MaterialType
-{
-	DIFFUSE,
-	SPECULAR,
-	GLOSSY,
-	GLASS
-};
-
-struct Material
-{
-	MaterialType type = MaterialType::DIFFUSE;
-	glm::vec3 baseColor = glm::vec3(1.0f);
-	float roughness = 0.0f;
-	glm::vec3 emissive = glm::vec3(0.0f);
-
-	int normalTexId = -1;
-
-	float ior = 1.0f;
-
-	float intensity = 0.0f;
-	int intensityTexId = -1;
-};
-
 namespace PathTracerLoader
 {
 	struct Element
@@ -144,6 +121,11 @@ public:
 
 	void SetCamera(const glm::vec3& pos, const glm::vec3& dir, const glm::vec3& up);
 	void SetProjection(float f, float fovy);
+
+	void CUDAInit();
+	void BuildGPUScene();
+	void CUDARender(float* img, float* data);
+
 	void RenderFrame();
 	void Exit();
 };
