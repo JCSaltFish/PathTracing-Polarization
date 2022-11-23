@@ -3321,7 +3321,6 @@ void OnExit()
 		glDeleteBuffers(1, &pbo);
 	if (gpuPolarData)
 		gpuErrchk(cudaFree(gpuPolarData));
-	CUDAFinish();
 }
 /* ----- PROGRAM FUNCTIONS ------ */
 
