@@ -495,10 +495,11 @@ const glm::vec3 PathTracer::Trace(const glm::vec3& ro, const glm::vec3& rd, std:
 			info->R = GetRsRp(1.0f, mat.ior, glm::dot(info->normal, rd));
 			float theta = 2.0f * M_PI * Rand();
 			float intensity = mat.intensity;
-			if (mat.intensityTexId != -1)
+			//if (mat.intensityTexId != -1)
+			if (mat.pIntensityData)
 			{
-				// TODO map intensity value here
-				intensity = mLoadedTextures[mat.intensityTexId]->tex2D(uv).r;
+				//intensity = mLoadedTextures[mat.intensityTexId]->tex2D(uv).r;
+				intensity = mat.pIntensityData->Read(uv);
 			}
 			info->S = glm::vec3(1.0f, cosf(theta), sinf(theta)) * intensity;
 			polarInfoList.push_back(info);
