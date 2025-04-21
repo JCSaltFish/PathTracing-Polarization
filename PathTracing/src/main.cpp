@@ -365,7 +365,7 @@ void LoadScene(const std::string& file)
 			m.intensity = val;
 			if (!std::getline(fr, line)) { fr.close(); return; }
 			if (!std::getline(fr, line)) { fr.close(); return; }
-			previewer.SetIntensityTextureForElement(i, j, line);
+			previewer.SetIntensityDataForElement(i, j, line);
 
 			previewer.SetMaterial(i, j, m);
 		}
@@ -602,7 +602,7 @@ void SaveAt(const std::string& path)
 			fw << element.normalTexFile << "\n";
 			fw << element.material.ior << "\n";
 			fw << element.material.intensity << "\n";
-			fw << element.intensityTexFile << "\n";
+			fw << element.intensityDataFile << "\n";
 		}
 	}
 
@@ -785,6 +785,16 @@ std::string LoadImage()
 	if (!imgPath_c)
 		return "";
 	return imgPath_c;
+}
+
+std::string LoadText()
+{
+	const char* filterItems[1] = { "*.txt" };
+	const char* filterDesc = "Text Files (*.txt)";
+	auto txtPath_c = tinyfd_openFileDialog("Load Text", pwd_r.c_str(), 1, filterItems, filterDesc, 0);
+	if (!txtPath_c)
+		return "";
+	return txtPath_c;
 }
 /* ----- TOOL FUNCTIONS ------ */
 
@@ -1801,8 +1811,9 @@ void GuiRightBar()
 						}
 						GuiInputContextMenu();
 
-						texId = objs[i].elements[j].intensityTexId;
-						if (texId != -1)
+						//texId = objs[i].elements[j].intensityTexId;
+						std::string file = objs[i].elements[j].intensityDataFile;
+						if (file != "")
 							ImGui::BeginDisabled();
 						val = objs[i].elements[j].material.intensity;
 						ImGui::Text("Intensity");
@@ -1817,10 +1828,32 @@ void GuiRightBar()
 							sceneModified = true;
 						}
 						GuiInputContextMenu();
-						if (texId != -1)
+						if (file != "")
 							ImGui::EndDisabled();
 
-						posY = ImGui::GetCursorPosY();
+						ImGui::Text("Intensity Map");
+						ImGui::SameLine(160);
+						ImGui::SetNextItemWidth(130);
+						idSubStr = "##intensityMap" + idStr;
+						if (ImGui::InputText(idSubStr.c_str(), &file))
+						{
+							previewer.SetIntensityDataForElement(i, j, file);
+							sceneModified = true;
+						}
+						GuiInputContextMenu();
+						ImGui::SameLine(295);
+						idSubStr = "Load##intensitymap" + idStr;
+						if (ImGui::Button(idSubStr.c_str(), ImVec2(65, 23)))
+						{
+							std::string txtPath = LoadText();
+							if (txtPath.size() != 0)
+							{
+								previewer.SetIntensityDataForElement(i, j, txtPath);
+								sceneModified = true;
+							}
+						}
+
+						/*posY = ImGui::GetCursorPosY();
 						ImGui::SetCursorPosY(posY + (50 - ImGui::GetTextLineHeight()) * 0.5f);
 						ImGui::Text("Intensity Map");
 
@@ -1857,7 +1890,7 @@ void GuiRightBar()
 						if (texId == -1)
 							ImGui::EndDisabled();
 						ImGui::PopFont();
-						ImGui::PopStyleVar();
+						ImGui::PopStyleVar();*/
 
 						ImGui::TreePop();
 					}

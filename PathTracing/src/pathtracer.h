@@ -18,6 +18,26 @@ enum class MaterialType
 	GLASS
 };
 
+class IntensityData
+{
+public:
+	IntensityData(const std::string& file);
+	~IntensityData() {}
+
+	float Read(const glm::vec2& uv)
+	{
+		if (uv.x > 1.0f || uv.x < 0.0f || uv.y > 1.0f || uv.y < 0.0f)
+			return 0.0f;
+		glm::ivec2 coord = glm::ivec2(mWidth * uv.x, mHeight * uv.y);
+		return mData[coord.y * mWidth + coord.x];
+	}
+
+private:
+	std::vector<float> mData;
+	int mWidth;
+	int mHeight;
+};
+
 struct Material
 {
 	MaterialType type = MaterialType::DIFFUSE;
@@ -31,6 +51,13 @@ struct Material
 
 	float intensity = 0.0f;
 	int intensityTexId = -1;
+	IntensityData* pIntensityData = nullptr;
+
+	~Material()
+	{
+		if (pIntensityData)
+			delete pIntensityData;
+	}
 };
 
 namespace PathTracerLoader
@@ -117,6 +144,13 @@ private:
 	const glm::vec3 CalculatePolarResult(const glm::vec3& initDir, const std::vector<PolarInfo*>& polarInfoList);
 	/* ----- POLAR FUNCTIONS ----- */
 
+	const glm::vec3 IntersectTriangle
+	(
+		const glm::vec3& ro, const glm::vec3& rd,
+		const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2
+	) const;
+	const bool LinearHit(const glm::vec3& ro, const glm::vec3& rd, Triangle& triangleOut, float& distOut);
+
 	const float Rand();
 	const glm::vec2 GetUV(const glm::vec3& p, const Triangle& t) const;
 	const glm::vec3 GetSmoothNormal(const glm::vec3& p, const Triangle& t) const;
@@ -141,6 +175,7 @@ public:
 
 	void SetPolarData(float* data);
 	void SetIntensityTextureForElement(int objId, int elementId, const std::string& file);
+	void SetIntensityDataForElement(int objId, int elementId, const std::string& file);
 
 	void SetCamera(const glm::vec3& pos, const glm::vec3& dir, const glm::vec3& up);
 	void SetProjection(float f, float fovy);

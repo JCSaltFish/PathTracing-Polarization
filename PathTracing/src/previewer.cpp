@@ -602,6 +602,16 @@ void Previewer::SetIntensityTextureForElement(int objId, int elementId, const st
     mLoadedObjects[objId].elements[elementId].intensityTexFile = file;
 }
 
+void Previewer::SetIntensityDataForElement(int objId, int elementId, const std::string& file)
+{
+    if (objId >= mLoadedObjects.size())
+        return;
+    if (elementId >= mLoadedObjects[objId].elements.size())
+        return;
+
+    mLoadedObjects[objId].elements[elementId].intensityDataFile = file;
+}
+
 void Previewer::SetMaterial(int objId, int elementId, Material& m)
 {
     if (objId >= mLoadedObjects.size())
@@ -691,6 +701,11 @@ void Previewer::SendObjectsToPathTracer(PathTracer* pPathTracer)
             {
                 pPathTracer->SetIntensityTextureForElement(i, j,
                     mLoadedObjects[i].elements[j].intensityTexFile);
+            }
+            if (mLoadedObjects[i].elements[j].intensityDataFile != "")
+            {
+                pPathTracer->SetIntensityDataForElement(i, j,
+                    mLoadedObjects[i].elements[j].intensityDataFile);
             }
         }
     }

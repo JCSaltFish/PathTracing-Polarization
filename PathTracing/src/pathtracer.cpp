@@ -1,5 +1,6 @@
 #define _USE_MATH_DEFINES
 #include <sstream>
+#include <fstream>
 #include <math.h>
 
 #include <omp.h>
@@ -170,6 +171,14 @@ void PathTracer::SetIntensityTextureForElement(int objId, int elementId, const s
 	}
 }
 
+void PathTracer::SetIntensityDataForElement(int objId, int elementId, const std::string& file)
+{
+	Material& mat = mLoadedObjects[objId].elements[elementId].material;
+	if (mat.pIntensityData)
+		delete mat.pIntensityData;
+	mat.pIntensityData = new IntensityData(file);
+}
+
 void PathTracer::SetMaterial(int objId, int elementId, Material& material)
 {
 	if (objId >= mLoadedObjects.size())
@@ -332,11 +341,70 @@ const glm::mat3 PathTracer::GetRotationMatrix(float phi) const
 	return M;
 }
 
+const glm::vec3 PathTracer::IntersectTriangle
+(
+	const glm::vec3& ro, const glm::vec3& rd,
+	const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2
+) const
+{
+	glm::vec3 edge1, edge2, h, s, q;
+	float a, f, u, v;
+
+	edge1 = v1 - v0;
+	edge2 = v2 - v0;
+	h = glm::cross(rd, edge2);
+	a = glm::dot(edge1, h);
+
+	if (abs(a) < EPS)
+		return glm::vec3(0.f);
+
+	f = 1.0f / a;
+	s = ro - v0;
+	u = f * glm::dot(s, h);
+
+	if (u < 0.0f || u > 1.0f)
+		return glm::vec3(0.f);
+
+	q = glm::cross(s, edge1);
+	v = f * glm::dot(rd, q);
+
+	if (v < 0.0f || u + v > 1.0f)
+		return glm::vec3(0.f);
+
+	float t = f * glm::dot(edge2, q);
+
+	if (t > EPS)
+		return glm::vec3(t, u, v);
+
+	return glm::vec3(0.f);
+}
+
+const bool PathTracer::LinearHit(const glm::vec3& ro, const glm::vec3& rd, Triangle& triangleOut, float& distOut)
+{
+	distOut = INF;
+	for (auto& t : mTriangles)
+	{
+		glm::vec3 test = IntersectTriangle(ro, rd, t.v1, t.v2, t.v3);
+		if (test.x > 0.f)
+		{
+			if (test.x < distOut)
+			{
+				triangleOut = t;
+				distOut = test.x;
+			}
+		}
+	}
+	if (distOut == INF)
+		return false;
+	return true;
+}
+
 const glm::vec3 PathTracer::Trace(const glm::vec3& ro, const glm::vec3& rd, std::vector<PolarInfo*>& polarInfoList, int depth, bool inside)
 {
 	float d = 0.0f;
 	Triangle t;
 	if (mBvh->Hit(ro, rd, t, d))
+	//if (LinearHit(ro, rd, t, d))
 	{
 		Material& mat = mLoadedObjects[t.objectId].elements[t.elementId].material;
 		glm::vec3 p = ro + rd * d;
@@ -519,7 +587,7 @@ void PathTracer::RenderFrame()
 	else if (numThreads > 0)
 		numThreads--;
 	// Loop through each pixel
-	#pragma omp parallel for num_threads(numThreads)
+	//#pragma omp parallel for num_threads(numThreads)
 	for (int i = 0; i < mResolution.y; i++)
 	{
 		if (mExit)
@@ -582,4 +650,42 @@ void PathTracer::RenderFrame()
 void PathTracer::Exit()
 {
 	mExit = true;
+}
+
+IntensityData::IntensityData(const std::string& file)
+{
+	std::ifstream inFile(file);
+	if (!inFile)
+		return;
+
+	std::string line;
+	mHeight = 0;
+	mWidth = 0;
+
+	std::vector<float> rowData;
+
+	while (std::getline(inFile, line))
+	{
+		std::istringstream iss(line);
+		float value;
+		int currentWidth = 0;
+
+		while (iss >> value)
+		{
+			rowData.push_back(value);
+			currentWidth++;
+		}
+
+		if (mHeight == 0)
+			mWidth = currentWidth;
+		else if (currentWidth != mWidth)
+			return;
+
+		mHeight++;
+	}
+
+	if (mWidth == 0 || mHeight == 0)
+		return;
+
+	mData = std::move(rowData);
 }

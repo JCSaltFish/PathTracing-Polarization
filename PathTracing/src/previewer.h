@@ -39,10 +39,12 @@ namespace PreviewerLoader
 
         GLuint intensityTexId;
         std::string intensityTexFile;
+        std::string intensityDataFile;
 
         Element(const std::string& name)
         {
             this->name = name;
+            vao = -1;
             vbo = -1;
             numTriangles = 0;
             normalTexId = -1;
@@ -51,6 +53,7 @@ namespace PreviewerLoader
 
             intensityTexId = -1;
             intensityTexFile = "";
+            intensityDataFile = "";
         }
     };
 
@@ -202,6 +205,7 @@ public:
     void SetMaterial(int objId, int elementId, Material& m);
 
     void SetIntensityTextureForElement(int objId, int elementId, const std::string& file);
+    void SetIntensityDataForElement(int objId, int elementId, const std::string& file);
 
     void SetLocation(int objId, const glm::vec3& location);
     void SetRotation(int objId, const glm::vec3& rotation);
