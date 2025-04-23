@@ -583,6 +583,25 @@ void Previewer::SetNormalTextureForElement(int objId, int elementId, const std::
     mLoadedObjects[objId].elements[elementId].normalTexFile = file;
 }
 
+void Previewer::SetRoughnessTextureForElement(int objId, int elementId, const std::string& file)
+{
+    if (objId >= mLoadedObjects.size())
+        return;
+    if (elementId >= mLoadedObjects[objId].elements.size())
+        return;
+
+    GLuint& tex = mLoadedObjects[objId].elements[elementId].roughnessTexId;
+    if (tex != -1)
+    {
+        glDeleteTextures(1, &tex);
+        tex = -1;
+    }
+    if (file.size() == 0)
+        return;
+    tex = LoadTexture(file);
+    mLoadedObjects[objId].elements[elementId].roughnessTexFile = file;
+}
+
 void Previewer::SetIntensityTextureForElement(int objId, int elementId, const std::string& file)
 {
     if (objId >= mLoadedObjects.size())
@@ -696,6 +715,11 @@ void Previewer::SendObjectsToPathTracer(PathTracer* pPathTracer)
             {
                 pPathTracer->SetNormalTextureForElement(i, j,
                     mLoadedObjects[i].elements[j].normalTexFile);
+            }
+            if (mLoadedObjects[i].elements[j].roughnessTexId != -1)
+            {
+                pPathTracer->SetRoughnessTextureForElement(i, j,
+                    mLoadedObjects[i].elements[j].roughnessTexFile);
             }
             if (mLoadedObjects[i].elements[j].intensityTexId != -1)
             {

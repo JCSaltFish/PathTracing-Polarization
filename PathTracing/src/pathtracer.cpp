@@ -158,6 +158,19 @@ void PathTracer::SetNormalTextureForElement(int objId, int elementId, const std:
 	}
 }
 
+void PathTracer::SetRoughnessTextureForElement(int objId, int elementId, const std::string& file)
+{
+	Material& mat = mLoadedObjects[objId].elements[elementId].material;
+	if (mat.roughnessTexId != -1)
+		mLoadedTextures[mat.roughnessTexId]->Load(file);
+	else
+	{
+		Image* texture = new Image(file);
+		mat.roughnessTexId = mLoadedTextures.size();
+		mLoadedTextures.push_back(texture);
+	}
+}
+
 void PathTracer::SetIntensityTextureForElement(int objId, int elementId, const std::string& file)
 {
 	Material& mat = mLoadedObjects[objId].elements[elementId].material;
@@ -425,6 +438,10 @@ const glm::vec3 PathTracer::Trace(const glm::vec3& ro, const glm::vec3& rd, std:
 		}
 		p += n * EPS;
 
+		float roughness = mat.roughness;
+		if (mat.roughnessTexId != -1)
+			roughness = mLoadedTextures[mat.roughnessTexId]->tex2D(uv).r;
+
 		if (depth < mMaxDepth * 2)
 		{
 			depth++;
@@ -457,7 +474,7 @@ const glm::vec3 PathTracer::Trace(const glm::vec3& ro, const glm::vec3& rd, std:
 				glm::vec3 u = glm::abs(n.x) < 1 - FLT_EPSILON ? glm::cross(glm::vec3(1, 0, 0), r) : glm::cross(glm::vec3(1), r);
 				u = glm::normalize(u);
 				glm::vec3 v = glm::cross(u, r);
-				float w = Rand() * mat.roughness, theta = Rand();
+				float w = Rand() * roughness, theta = Rand();
 				// wighted sampling on hemisphere
 				reflectDir = w * cosf(2 * M_PI * theta) * u + w * sinf(2 * M_PI * theta) * v + glm::sqrt(1 - w * w) * r;
 			}

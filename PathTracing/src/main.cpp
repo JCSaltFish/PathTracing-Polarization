@@ -99,6 +99,7 @@ bool canRestart = false;
 
 bool saveFile = false;
 bool exportFile = false;
+bool exportImage = false;
 std::string exportFilePath = "";
 std::string sceneFilePath = "";
 
@@ -676,10 +677,6 @@ void ExportAt(const std::string& path)
     statusText = "Exporting file at: " + path + "...";
 	statusShowBegin = std::chrono::steady_clock::now();
 
-    //stbi_flip_vertically_on_write(true);
-    //GLuint channel = 3; // rgb
-    //stbi_write_png(filePath.c_str(), wRender, hRender, channel, texData, channel * wRender);
-
     std::ofstream fw(path, std::ofstream::out);
 
 	for (int k = 0; k < 3; k++)
@@ -698,6 +695,40 @@ void ExportAt(const std::string& path)
 	}
 
     fw.close();
+
+	statusText = "Exported file at: " + path;
+	statusShowBegin = std::chrono::steady_clock::now();
+}
+
+void ExportImageAt(const std::string& path)
+{
+	statusText = "Exporting file at: " + path + "...";
+	statusShowBegin = std::chrono::steady_clock::now();
+
+	GLuint channel = 3;
+	GLubyte* data = new GLubyte[wRender * hRender * channel];
+
+	for (int i = hRender - 1; i >= 0; i--)
+	{
+		for (int j = 0; j < wRender; j++)
+		{
+			float s0 = polarData[(i * wRender + j) * 3 + 0];
+			float s1 = polarData[(i * wRender + j) * 3 + 1];
+			float s2 = polarData[(i * wRender + j) * 3 + 3];
+
+			float pixel = s0 == 0 ? 0 : sqrt(s1 * s1 + s2 * s2) / s0;
+			if (pixel > 1.0)
+				pixel = 1.0;
+			data[(i * wRender + j) * 3 + 0] = pixel * 255;
+			data[(i * wRender + j) * 3 + 1] = pixel * 255;
+			data[(i * wRender + j) * 3 + 2] = pixel * 255;
+		}
+	}
+
+	stbi_flip_vertically_on_write(true);
+	stbi_write_png(path.c_str(), wRender, hRender, channel, data, channel * wRender);
+
+	delete[] data;
 
 	statusText = "Exported file at: " + path;
 	statusShowBegin = std::chrono::steady_clock::now();
@@ -740,6 +771,46 @@ void Export()
 		if (!stop && !init)
 			pause = true;
 		exportFile = true;
+	}
+}
+
+void ExportImage()
+{
+	std::string scenename = sceneFilePath;
+	if (scenename.size() == 0)
+		scenename = "Untitled.pts";
+	else
+		scenename = scenename.substr(scenename.find_last_of('/') + 1);
+	scenename = scenename.substr(0, scenename.find_last_of(".pts") - 3);
+
+	exportFilePath = pwd_w + "/" + scenename + "_";
+	auto now = std::chrono::system_clock::now();
+	auto t = std::chrono::system_clock::to_time_t(now);
+	exportFilePath += std::to_string(std::localtime(&t)->tm_year + 1900);
+	exportFilePath += std::to_string(std::localtime(&t)->tm_mon);
+	exportFilePath += std::to_string(std::localtime(&t)->tm_mday);
+	exportFilePath += "_" + std::to_string(std::localtime(&t)->tm_hour);
+	exportFilePath += "_" + std::to_string(std::localtime(&t)->tm_min);
+	exportFilePath += "_" + std::to_string(std::localtime(&t)->tm_sec);
+	exportFilePath += ".png";
+
+	const char* filterItems[1] = { "*.png" };
+	const char* filterDesc = "PNG (*.png)";
+	auto txtPath_c = tinyfd_saveFileDialog
+	(
+		"Export As", PathUtil::NativePath(exportFilePath).c_str(),
+		1, filterItems, filterDesc
+	);
+	if (txtPath_c)
+	{
+		std::string txtPath = PathUtil::UniversalPath(txtPath_c);
+		pwd_w = txtPath.substr(0, txtPath.find_last_of('/'));
+		exportFilePath = txtPath;
+
+		render = false;
+		if (!stop && !init)
+			pause = true;
+		exportImage = true;
 	}
 }
 
@@ -992,14 +1063,14 @@ void GuiMenuBar()
 	{
 		if (ImGui::BeginMenu("File"))
 		{
-			if (ImGui::MenuItem("New Scene", "CTRL+N", false, !saveFile && !exportFile && canLoad))
+			if (ImGui::MenuItem("New Scene", "CTRL+N", false, !saveFile && !exportFile && !exportImage && canLoad))
 				NewScene();
 
-			if (ImGui::MenuItem("Open Scene...", "CTRL+O", false, !saveFile && !exportFile && canLoad))
+			if (ImGui::MenuItem("Open Scene...", "CTRL+O", false, !saveFile && !exportFile && !exportImage && canLoad))
 				OpenScene();
 
 			ImGui::Separator();
-			if (ImGui::MenuItem("Save", ICON_FK_FLOPPY_O, "CTRL+S", false, (!saveFile && !exportFile)))
+			if (ImGui::MenuItem("Save", ICON_FK_FLOPPY_O, "CTRL+S", false, (!saveFile && !exportFile && !exportImage)))
 			{
 				if (sceneFilePath.size() == 0)
 					SaveAs();
@@ -1007,14 +1078,14 @@ void GuiMenuBar()
 					Save();
 			}
 
-			if (ImGui::MenuItem("Save As...", "CTRL+SHIFT+S", false, !saveFile && !exportFile))
+			if (ImGui::MenuItem("Save As...", "CTRL+SHIFT+S", false, !saveFile && !exportFile && !exportImage))
 				SaveAs();
 
 			ImGui::Separator();
 			if (ImGui::MenuItem("Load Object...", "CTRL+L", false, canLoad))
 				LoadObject();
 
-			if (ImGui::MenuItem("Export...", ICON_FK_SIGN_OUT, "CTRL+E", false, !saveFile && !exportFile))
+			if (ImGui::MenuItem("Export...", ICON_FK_SIGN_OUT, "CTRL+E", false, !saveFile && !exportFile && !exportImage))
 				Export();
 
 			ImGui::Separator();
@@ -1145,7 +1216,7 @@ void GuiToolbar()
 		ImGuiWindowFlags_NoBringToFrontOnFocus);
 
 	ImGui::SetCursorPosY((ImGui::GetWindowHeight() - 30) * 0.5f);
-	if (saveFile || exportFile)
+	if (saveFile || exportFile || exportImage)
 	{
 		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.4f, 0.4f, 0.4f, 1.0f));
 		ImGui::Button(ICON_FK_FLOPPY_O "   Save", ImVec2(0, 30));
@@ -1163,7 +1234,7 @@ void GuiToolbar()
 	}
 
 	ImGui::SameLine();
-	if (saveFile || exportFile)
+	if (saveFile || exportFile || exportImage)
 	{
 		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.4f, 0.4f, 0.4f, 1.0f));
 		ImGui::Button(ICON_FK_SIGN_OUT "   Export", ImVec2(0, 30));
@@ -1173,6 +1244,19 @@ void GuiToolbar()
 	{
 		if (ImGui::Button(ICON_FK_SIGN_OUT "   Export", ImVec2(0, 30)))
 			Export();
+	}
+
+	ImGui::SameLine();
+	if (saveFile || exportFile || exportImage)
+	{
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.4f, 0.4f, 0.4f, 1.0f));
+		ImGui::Button(ICON_FK_SIGN_OUT "   Export Polar Image", ImVec2(0, 30));
+		ImGui::PopStyleColor();
+	}
+	else
+	{
+		if (ImGui::Button(ICON_FK_SIGN_OUT "   Export Polar Image", ImVec2(0, 30)))
+			ExportImage();
 	}
 
 	ImGui::SameLine();
@@ -1737,6 +1821,9 @@ void GuiRightBar()
 						float val = objs[i].elements[j].material.roughness;
 						if (objs[i].elements[j].material.type == MaterialType::GLOSSY)
 						{
+							GLuint texId = objs[i].elements[j].roughnessTexId;
+							if (texId != -1)
+								ImGui::BeginDisabled();
 							ImGui::Text("Roughness");
 							ImGui::SameLine(160);
 							ImGui::SetNextItemWidth(150);
@@ -1749,6 +1836,49 @@ void GuiRightBar()
 								previewer.SetMaterial(i, j, m);
 								sceneModified = true;
 							}
+							if (texId != -1)
+								ImGui::EndDisabled();
+
+							posY = ImGui::GetCursorPosY();
+							ImGui::SetCursorPosY(posY + (50 - ImGui::GetTextLineHeight()) * 0.5f);
+							ImGui::Text("Roughness Texture");
+
+							ImGui::SameLine(160);
+							ImGui::SetCursorPosY(posY);
+							ImGui::Image((void*)texId, ImVec2(50, 50));
+
+							ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.0f, 0.5f));
+							ImGui::PushFont(normalIconFont);
+							ImGui::SameLine();
+							int posX = ImGui::GetCursorPosX();
+							ImGui::SetCursorPosY(posY);
+							idSubStr = "Load##roughnessmap" + idStr;
+							if (ImGui::Button(idSubStr.c_str(), ImVec2(65, 23)))
+							{
+								std::string imgPath = LoadImage();
+								if (imgPath.size() != 0)
+								{
+									previewer.SetRoughnessTextureForElement(i, j, imgPath);
+									preview = true;
+									sceneModified = true;
+								}
+							}
+
+							ImGui::SetCursorPosX(posX);
+							ImGui::SetCursorPosY(posY + 27);
+							if (texId == -1)
+								ImGui::BeginDisabled();
+							idSubStr = "Remove##roughnessmap" + idStr;
+							if (ImGui::Button(idSubStr.c_str(), ImVec2(65, 23)))
+							{
+								previewer.SetRoughnessTextureForElement(i, j, "");
+								preview = true;
+								sceneModified = true;
+							}
+							if (texId == -1)
+								ImGui::EndDisabled();
+							ImGui::PopFont();
+							ImGui::PopStyleVar();
 						}
 
 						posY = ImGui::GetCursorPosY();
@@ -3249,6 +3379,12 @@ void PathTracerLoop()
 		{
 			ExportAt(exportFilePath);
 			exportFile = false;
+		}
+
+		if (exportImage)
+		{
+			ExportImageAt(exportFilePath);
+			exportImage = false;
 		}
 
 		if (saveFile)
