@@ -34,8 +34,12 @@ namespace PreviewerLoader
         int numTriangles;
         GLuint normalTexId;
         std::string normalTexFile;
+
+        //粗糙度后加
         GLuint roughnessTexId;
         std::string roughnessTexFile;
+        //
+
         Material material;
         bool highlight;
 
@@ -51,8 +55,12 @@ namespace PreviewerLoader
             numTriangles = 0;
             normalTexId = -1;
             normalTexFile = "";
+
+            //粗糙度后加
             roughnessTexId = -1;
             roughnessTexFile = "";
+            //
+
             highlight = false;
 
             intensityTexId = -1;
@@ -206,10 +214,12 @@ public:
     const bool LoadObject(const std::string& filename, int id = -1);
     std::vector<PreviewerLoader::Object> GetLoadedObjects() const;
     void SetNormalTextureForElement(int objId, int elementId, const std::string& file);
-    void SetRoughnessTextureForElement(int objId, int elementId, const std::string& file);
     void SetMaterial(int objId, int elementId, Material& m);
-
+    
+    //粗糙度后加
+    void SetRoughnessTextureForElement(int objId, int elementId, const std::string& file);
     void SetIntensityTextureForElement(int objId, int elementId, const std::string& file);
+    //
     void SetIntensityDataForElement(int objId, int elementId, const std::string& file);
 
     void SetLocation(int objId, const glm::vec3& location);

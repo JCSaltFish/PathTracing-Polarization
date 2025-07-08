@@ -51,7 +51,9 @@ struct Material
 
 	float intensity = 0.0f;
 	int intensityTexId = -1;
+	//粗糙度后加
 	int roughnessTexId = -1;
+
 	IntensityData* pIntensityData = nullptr;
 
 	~Material()
@@ -160,7 +162,9 @@ private:
 public:
 	void LoadObject(const std::string& file, const glm::mat4& model);
 	void SetNormalTextureForElement(int objId, int elementId, const std::string& file);
+	//粗糙度后加
 	void SetRoughnessTextureForElement(int objId, int elementId, const std::string& file);
+	//
 	void SetMaterial(int objId, int elementId, Material& material);
 	void BuildBVH();
 	void ResetImage();

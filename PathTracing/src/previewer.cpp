@@ -583,6 +583,7 @@ void Previewer::SetNormalTextureForElement(int objId, int elementId, const std::
     mLoadedObjects[objId].elements[elementId].normalTexFile = file;
 }
 
+//粗糙度后加
 void Previewer::SetRoughnessTextureForElement(int objId, int elementId, const std::string& file)
 {
     if (objId >= mLoadedObjects.size())
@@ -601,6 +602,7 @@ void Previewer::SetRoughnessTextureForElement(int objId, int elementId, const st
     tex = LoadTexture(file);
     mLoadedObjects[objId].elements[elementId].roughnessTexFile = file;
 }
+
 
 void Previewer::SetIntensityTextureForElement(int objId, int elementId, const std::string& file)
 {
@@ -716,11 +718,15 @@ void Previewer::SendObjectsToPathTracer(PathTracer* pPathTracer)
                 pPathTracer->SetNormalTextureForElement(i, j,
                     mLoadedObjects[i].elements[j].normalTexFile);
             }
+
+            //粗糙度后加
             if (mLoadedObjects[i].elements[j].roughnessTexId != -1)
             {
                 pPathTracer->SetRoughnessTextureForElement(i, j,
                     mLoadedObjects[i].elements[j].roughnessTexFile);
             }
+            //
+
             if (mLoadedObjects[i].elements[j].intensityTexId != -1)
             {
                 pPathTracer->SetIntensityTextureForElement(i, j,

@@ -99,6 +99,8 @@ bool canRestart = false;
 
 bool saveFile = false;
 bool exportFile = false;
+
+//粗糙度
 bool exportImage = false;
 std::string exportFilePath = "";
 std::string sceneFilePath = "";
@@ -248,7 +250,7 @@ void LoadScene(const std::string& file)
 	std::string fileVersion = line.substr(line.find_first_of('=') + 1);
 	if (fileVersion != version) { fr.close(); return; }
 	if (fr.eof()) { fr.close(); return; }
-	
+
 	ClearScene();
 
 	int ival = 0;
@@ -674,10 +676,14 @@ void OpenScene()
 // This function runs in path tracer thread
 void ExportAt(const std::string& path)
 {
-    statusText = "Exporting file at: " + path + "...";
+	statusText = "Exporting file at: " + path + "...";
 	statusShowBegin = std::chrono::steady_clock::now();
 
-    std::ofstream fw(path, std::ofstream::out);
+	//stbi_flip_vertically_on_write(true);
+	//GLuint channel = 3; // rgb
+	//stbi_write_png(filePath.c_str(), wRender, hRender, channel, texData, channel * wRender);
+
+	std::ofstream fw(path, std::ofstream::out);
 
 	for (int k = 0; k < 3; k++)
 	{
@@ -694,12 +700,14 @@ void ExportAt(const std::string& path)
 		}
 	}
 
-    fw.close();
+	fw.close();
 
 	statusText = "Exported file at: " + path;
 	statusShowBegin = std::chrono::steady_clock::now();
 }
 
+
+//粗糙度后加
 void ExportImageAt(const std::string& path)
 {
 	statusText = "Exporting file at: " + path + "...";
@@ -733,6 +741,7 @@ void ExportImageAt(const std::string& path)
 	statusText = "Exported file at: " + path;
 	statusShowBegin = std::chrono::steady_clock::now();
 }
+
 
 void Export()
 {
@@ -774,6 +783,8 @@ void Export()
 	}
 }
 
+
+//粗糙度后加
 void ExportImage()
 {
 	std::string scenename = sceneFilePath;
@@ -850,7 +861,7 @@ void ReplaceWith()
 
 std::string LoadImage()
 {
-	const char* filterItems[5] = { "*.jpg", "*.jpeg", "*.png", "*.bmp", "*.tga"};
+	const char* filterItems[5] = { "*.jpg", "*.jpeg", "*.png", "*.bmp", "*.tga" };
 	const char* filterDesc = "Image Files (*.jpg;*.jpeg;*.png;*.bmp;*.tga)";
 	auto imgPath_c = tinyfd_openFileDialog("Load Image", pwd_r.c_str(), 5, filterItems, filterDesc, 0);
 	if (!imgPath_c)
@@ -1063,13 +1074,17 @@ void GuiMenuBar()
 	{
 		if (ImGui::BeginMenu("File"))
 		{
+			//if (ImGui::MenuItem("New Scene", "CTRL+N", false, !saveFile && !exportFile && canLoad)) 粗糙度后改
 			if (ImGui::MenuItem("New Scene", "CTRL+N", false, !saveFile && !exportFile && !exportImage && canLoad))
 				NewScene();
 
+			//if (ImGui::MenuItem("Open Scene...", "CTRL+O", false, !saveFile && !exportFile && canLoad))
 			if (ImGui::MenuItem("Open Scene...", "CTRL+O", false, !saveFile && !exportFile && !exportImage && canLoad))
 				OpenScene();
 
+
 			ImGui::Separator();
+			//if (ImGui::MenuItem("Save", ICON_FK_FLOPPY_O, "CTRL+S", false, (!saveFile && !exportFile)))
 			if (ImGui::MenuItem("Save", ICON_FK_FLOPPY_O, "CTRL+S", false, (!saveFile && !exportFile && !exportImage)))
 			{
 				if (sceneFilePath.size() == 0)
@@ -1078,6 +1093,7 @@ void GuiMenuBar()
 					Save();
 			}
 
+			//if (ImGui::MenuItem("Save As...", "CTRL+SHIFT+S", false, !saveFile && !exportFile))
 			if (ImGui::MenuItem("Save As...", "CTRL+SHIFT+S", false, !saveFile && !exportFile && !exportImage))
 				SaveAs();
 
@@ -1085,6 +1101,7 @@ void GuiMenuBar()
 			if (ImGui::MenuItem("Load Object...", "CTRL+L", false, canLoad))
 				LoadObject();
 
+			//if (ImGui::MenuItem("Export...", ICON_FK_SIGN_OUT, "CTRL+E", false, !saveFile && !exportFile))
 			if (ImGui::MenuItem("Export...", ICON_FK_SIGN_OUT, "CTRL+E", false, !saveFile && !exportFile && !exportImage))
 				Export();
 
@@ -1216,6 +1233,7 @@ void GuiToolbar()
 		ImGuiWindowFlags_NoBringToFrontOnFocus);
 
 	ImGui::SetCursorPosY((ImGui::GetWindowHeight() - 30) * 0.5f);
+	//if (saveFile || exportFile)粗糙度后改
 	if (saveFile || exportFile || exportImage)
 	{
 		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.4f, 0.4f, 0.4f, 1.0f));
@@ -1234,6 +1252,7 @@ void GuiToolbar()
 	}
 
 	ImGui::SameLine();
+	//if (saveFile || exportFile)粗糙度后改
 	if (saveFile || exportFile || exportImage)
 	{
 		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.4f, 0.4f, 0.4f, 1.0f));
@@ -1821,9 +1840,11 @@ void GuiRightBar()
 						float val = objs[i].elements[j].material.roughness;
 						if (objs[i].elements[j].material.type == MaterialType::GLOSSY)
 						{
+							//粗糙度后加
 							GLuint texId = objs[i].elements[j].roughnessTexId;
 							if (texId != -1)
 								ImGui::BeginDisabled();
+
 							ImGui::Text("Roughness");
 							ImGui::SameLine(160);
 							ImGui::SetNextItemWidth(150);
@@ -1836,6 +1857,7 @@ void GuiRightBar()
 								previewer.SetMaterial(i, j, m);
 								sceneModified = true;
 							}
+							//粗糙度后加
 							if (texId != -1)
 								ImGui::EndDisabled();
 
@@ -2491,7 +2513,7 @@ void GuiSaveDialog()
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(28, 20));
 	ImGui::PushStyleColor(ImGuiCol_PopupBg, ImVec4(0.13f, 0.13f, 0.13f, 1.0f));
 	ImGui::OpenPopup("PathTracer##SaveDialog");
-	
+
 	ImGui::SetNextWindowPos
 	(
 		ImVec2(ImGui::GetIO().DisplaySize.x * 0.5f, ImGui::GetIO().DisplaySize.y * 0.5f),
@@ -2615,7 +2637,7 @@ void DrawGui()
 	ImGui::NewFrame();
 
 	ExecInputContextMenuCmd();
-	
+
 	GuiMenuBar();
 
 	ImGui::PushStyleColor(ImGuiCol_PopupBg, ImVec4(0.09f, 0.09f, 0.09f, 1.0f));
@@ -2623,7 +2645,7 @@ void DrawGui()
 	GuiToolbar();
 
 	GuiRightBar();
-	
+
 	GuiMainViewport();
 	GuiStausBar();
 
@@ -3125,7 +3147,7 @@ int InitializeGL(GLFWwindow*& window)
 {
 	if (!glfwInit())
 		return -1;
-	
+
 	wWindow = wRender + rightBarWidth;
 	hWindow = hRender + menuHeight + toolbarHeight + statusBarHeight;
 	window = glfwCreateWindow(wWindow, hWindow, "PathTracer - Polarization", NULL, NULL);
@@ -3209,7 +3231,7 @@ void InitializeFrame()
 		glGenVertexArrays(1, &quadVao);
 
 	if (frameTex == -1)
-	glGenTextures(1, &frameTex);
+		glGenTextures(1, &frameTex);
 	glBindTexture(GL_TEXTURE_2D, frameTex);
 	if (texData)
 		delete[] texData;
@@ -3381,11 +3403,13 @@ void PathTracerLoop()
 			exportFile = false;
 		}
 
+		//粗糙度后加
 		if (exportImage)
 		{
 			ExportImageAt(exportFilePath);
 			exportImage = false;
 		}
+		//
 
 		if (saveFile)
 		{
@@ -3445,14 +3469,14 @@ int main(int argc, char** argv)
 	InitializeFrame();
 
 	omp_set_nested(1);
-	#pragma omp parallel sections num_threads(2)
+#pragma omp parallel sections num_threads(2)
 	{
-		#pragma omp section
+#pragma omp section
 		{
 			GlfwLoop();
 			pathTracer.Exit();
 		}
-		#pragma omp section
+#pragma omp section
 		{
 			PathTracerLoop();
 		}
