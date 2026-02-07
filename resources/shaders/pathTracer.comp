@@ -237,6 +237,15 @@ vec3 sampleGlass(vec3 wi, vec3 n, inout bool inside, float ior) {
         );
     }
 }
+/**
+ * @brief Sample a point uniformly on a unit disk.
+ * @return A 2D vector representing the sampled point on the disk.
+ */
+vec2 sampleDisk() {
+    float r = sqrt(rand());
+    float theta = 2.0 * PI * rand();
+    return vec2(cos(theta), sin(theta)) * r;
+}
 
 /**
  * @brief Struct representing a ray in 3D space.
@@ -547,7 +556,7 @@ vec4 trace(Ray ray) {
             vec3 wi = newRay.direction;
             vec3 wo = reflect(wi, n);
 
-            // === Material sampling ===
+            // Material sampling
             if (material.type == MATERIAL_TYPE_DIFFUSE)
                 wo = sampleWeightedHemisphere(n, 1.0);
             else if (material.type == MATERIAL_TYPE_GLOSSY) {
@@ -563,7 +572,7 @@ vec4 trace(Ray ray) {
                     p -= n * EPS * 2.0;
             }
 
-            // === Polarization bookkeeping ===
+            // Polarization bookkeeping
             PolarInfo info;
             info.dirOut = wo;
             vec3 normal = normalize(wo - wi);
@@ -608,9 +617,19 @@ void main() {
     vec3 imageCenter = u_camera.pos.xyz + forward * u_camera.focal;
     vec3 imagePoint = imageCenter + ndc.x * halfWidth * right + ndc.y * halfHeight * up;
 
+    vec3 pinholeDir = normalize(imagePoint - u_camera.pos.xyz);
+    // Focus plane intersection
+    float tFocus = u_camera.focusDist / dot(pinholeDir, forward);
+    vec3 focusPoint = u_camera.pos.xyz + pinholeDir * tFocus;
+    // Aperture
+    float apertureRadius = 0.5 * (u_camera.focal / u_camera.fStop);
+    // Lens sampling
+    vec2 lensSample = sampleDisk() * apertureRadius;
+    vec3 lensOffset = right * lensSample.x + up * lensSample.y;
+
     Ray ray;
-    ray.origin = u_camera.pos.xyz;
-    ray.direction = normalize(imagePoint - ray.origin);
+    ray.origin = u_camera.pos.xyz + lensOffset;
+    ray.direction = normalize(focusPoint - ray.origin);
     vec4 color = trace(ray);
 
     if (u_scene.currentSample > 1)
