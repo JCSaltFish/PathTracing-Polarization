@@ -21,13 +21,11 @@
 
 #include "app/Application.h"
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
     Application app(argc, argv);
     if (app.init() != 0)
         return -1; // Initialization failed
-    if (app.run() != 0)
-    {
+    if (app.run() != 0) {
         app.term(); // Ensure proper termination on run failure
         return -1; // Run failed
     }
