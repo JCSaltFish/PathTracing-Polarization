@@ -7,9 +7,9 @@
 
 #include "utils/UtilsCommon.h"
 
- /**
-  * @brief A template class for bitwise.
-  */
+/**
+ * @brief A template class for bitwise.
+ */
 template<typename Enum>
 class Flags {
 public:

@@ -1912,8 +1912,7 @@ void PathTracerApp::handleMeshListTextureEvent
     case UiRightPanel::ID::MESH_INTENSITY_TEX_LOAD:
     {
         const char* filters[5] = { "*.txt" };
-        const char* filename = tinyfd_openFileDialog
-        (
+        const char* filename = tinyfd_openFileDialog(
             GuiText::get("load_txt_dialog.title").c_str(),
             "",
             1,
@@ -2222,8 +2221,7 @@ int PathTracerApp::loadModelUtil(const std::string& filename) {
 
 std::string PathTracerApp::loadImage() {
     const char* filters[5] = { "*.jpg", "*.jpeg", "*.png", "*.bmp", "*.tga" };
-    const char* filename = tinyfd_openFileDialog
-    (
+    const char* filename = tinyfd_openFileDialog(
         GuiText::get("load_image_dialog.title").c_str(),
         "",
         1,

@@ -11,7 +11,7 @@
 #include "core/PostProcesser.h"
 
 #include "utils/FrameTimer.h"
-#include "utils/Stopwatch.hpp"
+#include "utils/Stopwatch.h"
 
 #include "ui/UiMenuBar.hpp"
 #include "ui/UiToolBar.hpp"

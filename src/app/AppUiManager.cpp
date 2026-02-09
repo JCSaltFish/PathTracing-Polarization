@@ -131,39 +131,41 @@ void AppUiManager::initUI(float dpiScale) {
 
     ImGui::GetIO().FontDefault = m_boldIconFont;
 
-    ImGui::GetStyle().WindowPadding = ImVec2(6.0f, 4.0f);
-    ImGui::GetStyle().FramePadding = ImVec2(8.0f, 2.0f);
-    ImGui::GetStyle().ItemSpacing = ImVec2(4.0f, 6.0f);
-    ImGui::GetStyle().IndentSpacing = 12.0f;
-    ImGui::GetStyle().FrameBorderSize = 1.0f;
-    ImGui::GetStyle().FrameRounding = 3.0f;
-    ImGui::GetStyle().GrabRounding = 2.0f;
+    ImGuiStyle& style = ImGui::GetStyle();
 
-    ImGui::GetStyle().Colors[ImGuiCol_Text] = ImVec4(0.94f, 0.94f, 0.94f, 1.0f);
-    ImGui::GetStyle().Colors[ImGuiCol_TextDisabled] = ImVec4(0.66f, 0.66f, 0.66f, 1.0f);
-    ImGui::GetStyle().Colors[ImGuiCol_WindowBg] = ImVec4(0.13f, 0.13f, 0.13f, 1.0f);
-    ImGui::GetStyle().Colors[ImGuiCol_PopupBg] = ImVec4(0.25f, 0.25f, 0.25f, 1.0f);
-    ImGui::GetStyle().Colors[ImGuiCol_Border] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
-    ImGui::GetStyle().Colors[ImGuiCol_FrameBg] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
-    ImGui::GetStyle().Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.25f, 0.25f, 0.25f, 0.4f);
-    ImGui::GetStyle().Colors[ImGuiCol_FrameBgActive] = ImVec4(0.4f, 0.4f, 0.4f, 0.4f);
-    ImGui::GetStyle().Colors[ImGuiCol_TitleBg] = ImVec4(0.18f, 0.18f, 0.18f, 1.0f);
-    ImGui::GetStyle().Colors[ImGuiCol_TitleBgActive] = ImVec4(0.18f, 0.18f, 0.18f, 1.0f);
-    ImGui::GetStyle().Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.18f, 0.18f, 0.18f, 1.0f);
-    ImGui::GetStyle().Colors[ImGuiCol_MenuBarBg] = ImVec4(0.06f, 0.06f, 0.06f, 1.0f);
-    ImGui::GetStyle().Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.1f, 0.1f, 0.1f, 1.0f);
-    ImGui::GetStyle().Colors[ImGuiCol_SliderGrab] = ImVec4(0.25f, 0.25f, 0.25f, 1.0f);
-    ImGui::GetStyle().Colors[ImGuiCol_Button] = ImVec4(0.25f, 0.25f, 0.25f, 1.0f);
-    ImGui::GetStyle().Colors[ImGuiCol_ButtonHovered] = ImVec4(0.4f, 0.4f, 0.4f, 1.0f);
-    ImGui::GetStyle().Colors[ImGuiCol_HeaderHovered] = ImVec4(0.1f, 0.4f, 0.9f, 1.0f);
-    ImGui::GetStyle().Colors[ImGuiCol_Tab] = ImVec4(0.06f, 0.06f, 0.06f, 1.0f);
-    ImGui::GetStyle().Colors[ImGuiCol_TabHovered] = ImVec4(0.4f, 0.4f, 0.4f, 1.0f);
-    ImGui::GetStyle().Colors[ImGuiCol_TabActive] = ImVec4(0.25f, 0.25f, 0.25f, 1.0f);
-    ImGui::GetStyle().Colors[ImGuiCol_ResizeGrip] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
-    ImGui::GetStyle().Colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
-    ImGui::GetStyle().Colors[ImGuiCol_ResizeGripActive] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
-    ImGui::GetStyle().Colors[ImGuiCol_SeparatorActive] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
-    ImGui::GetStyle().Colors[ImGuiCol_PlotHistogram] = ImVec4(0.25f, 0.25f, 0.25f, 1.0f);
+    style.WindowPadding = ImVec2(6.0f, 4.0f);
+    style.FramePadding = ImVec2(8.0f, 2.0f);
+    style.ItemSpacing = ImVec2(4.0f, 6.0f);
+    style.IndentSpacing = 12.0f;
+    style.FrameBorderSize = 1.0f;
+    style.FrameRounding = 3.0f;
+    style.GrabRounding = 2.0f;
+
+    style.Colors[ImGuiCol_Text] = ImVec4(0.94f, 0.94f, 0.94f, 1.0f);
+    style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.66f, 0.66f, 0.66f, 1.0f);
+    style.Colors[ImGuiCol_WindowBg] = ImVec4(0.13f, 0.13f, 0.13f, 1.0f);
+    style.Colors[ImGuiCol_PopupBg] = ImVec4(0.25f, 0.25f, 0.25f, 1.0f);
+    style.Colors[ImGuiCol_Border] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
+    style.Colors[ImGuiCol_FrameBg] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
+    style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.25f, 0.25f, 0.25f, 0.4f);
+    style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.4f, 0.4f, 0.4f, 0.4f);
+    style.Colors[ImGuiCol_TitleBg] = ImVec4(0.18f, 0.18f, 0.18f, 1.0f);
+    style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.18f, 0.18f, 0.18f, 1.0f);
+    style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.18f, 0.18f, 0.18f, 1.0f);
+    style.Colors[ImGuiCol_MenuBarBg] = ImVec4(0.06f, 0.06f, 0.06f, 1.0f);
+    style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.1f, 0.1f, 0.1f, 1.0f);
+    style.Colors[ImGuiCol_SliderGrab] = ImVec4(0.25f, 0.25f, 0.25f, 1.0f);
+    style.Colors[ImGuiCol_Button] = ImVec4(0.25f, 0.25f, 0.25f, 1.0f);
+    style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.4f, 0.4f, 0.4f, 1.0f);
+    style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.1f, 0.4f, 0.9f, 1.0f);
+    style.Colors[ImGuiCol_Tab] = ImVec4(0.06f, 0.06f, 0.06f, 1.0f);
+    style.Colors[ImGuiCol_TabHovered] = ImVec4(0.4f, 0.4f, 0.4f, 1.0f);
+    style.Colors[ImGuiCol_TabActive] = ImVec4(0.25f, 0.25f, 0.25f, 1.0f);
+    style.Colors[ImGuiCol_ResizeGrip] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
+    style.Colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
+    style.Colors[ImGuiCol_ResizeGripActive] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
+    style.Colors[ImGuiCol_SeparatorActive] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
+    style.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.25f, 0.25f, 0.25f, 1.0f);
 }
 
 float AppUiManager::getDpiScale() const {
@@ -185,8 +187,7 @@ ImTextureID AppUiManager::getImGuiTexture(GfxRenderer renderer, GfxImage image) 
     GfxRendererInterface::ImageInfo imageInfo = renderer->getImageInfo(image);
     if (renderer->getBackend() == GfxBackend::Vulkan) {
         auto& vulkanInfo = std::get<GfxRendererInterface::ImageVulkanInfo>(imageInfo);
-        VkDescriptorSet tex = ImGui_ImplVulkan_AddTexture
-        (
+        VkDescriptorSet tex = ImGui_ImplVulkan_AddTexture(
             reinterpret_cast<VkSampler>(vulkanInfo.sampler),
             reinterpret_cast<VkImageView>(vulkanInfo.imageView),
             static_cast<VkImageLayout>(vulkanInfo.imageLayout)

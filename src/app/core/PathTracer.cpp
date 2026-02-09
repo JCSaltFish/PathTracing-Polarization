@@ -382,6 +382,10 @@ void PathTracer::setRenderFinishCallback(const std::function<void()>& cb) {
 }
 
 void PathTracer::loadModels(const DbObjHandle& hScene, BufferData& data) {
+    std::unordered_map<std::string, uint32_t> textureIndexMap;
+    std::vector<GfxImage> textures = {};
+    textures.push_back(AppTextureManager::instance().getDefaultTexture());
+
     for (const auto& hModel : PtScene::getModels(hScene)) {
         /* Load model data from file */
         std::string filename = PtModel::getFilePath(hModel);
@@ -432,29 +436,43 @@ void PathTracer::loadModels(const DbObjHandle& hScene, BufferData& data) {
 
             Flags<PtMaterial::MaterialFlag> materialFlags = material.flags;
             // Load textures
-            auto getTexture = [](const std::string& texPath, std::vector<GfxImage>& textures) {
-                GfxImage texture = AppTextureManager::instance().getTexture(texPath);
-                if (texture != nullptr) {
-                    textures.push_back(texture);
-                    return static_cast<uint32_t>(textures.size() - 1);
-                } else
-                    return static_cast<uint32_t>(0);
+            auto getTextureIndex = [&](const std::string& path, auto&& loader) -> uint32_t {
+                if (path.empty())
+                    return 0;
+                auto it = textureIndexMap.find(path);
+                if (it != textureIndexMap.end())
+                    return it->second;
+                GfxImage tex = loader(path);
+                if (!tex)
+                    return 0;
+                uint32_t index = static_cast<uint32_t>(textures.size());
+                textures.push_back(tex);
+                textureIndexMap.emplace(path, index);
+                return index;
                 };
             if (materialFlags.check(PtMaterial::MaterialFlag::NORMAL_MAP)) {
-                material.idxNormalTex =
-                    getTexture(PtMaterial::getNormalTexPath(hMaterial), data.textures);
+                material.idxNormalTex = getTextureIndex(
+                    PtMaterial::getNormalTexPath(hMaterial),
+                    [](const std::string& path) {
+                        return AppTextureManager::instance().getTexture(path);
+                    }
+                );
             }
             if (materialFlags.check(PtMaterial::MaterialFlag::ROUGHNESS_MAP)) {
-                material.idxRoughnessTex =
-                    getTexture(PtMaterial::getRoughnessTexPath(hMaterial), data.textures);
+                material.idxRoughnessTex = material.idxNormalTex = getTextureIndex(
+                    PtMaterial::getRoughnessTexPath(hMaterial),
+                    [](const std::string& path) {
+                        return AppTextureManager::instance().getTexture(path);
+                    }
+                );
             }
             if (materialFlags.check(PtMaterial::MaterialFlag::INTENSITY_MAP)) {
-                std::string texPath = PtMaterial::getIntensityTexPath(hMaterial);
-                GfxImage texture = AppTextureManager::instance().getIntensityTexture(texPath);
-                if (texture != nullptr) {
-                    data.textures.push_back(texture);
-                    material.idxIntensityTex = data.textures.size() - 1;
-                }
+                material.idxIntensityTex = getTextureIndex(
+                    PtMaterial::getIntensityTexPath(hMaterial),
+                    [](const std::string& path) {
+                        return AppTextureManager::instance().getIntensityTexture(path);
+                    }
+                );
             }
         }
 
@@ -506,14 +524,13 @@ void PathTracer::loadModels(const DbObjHandle& hScene, BufferData& data) {
         }
     }
 
+    data.textures = std::move(textures);
+
     /* Build scene BVH */
     BvhBuilder bvhBuilder;
     std::shared_ptr<BvhNode> bvh = bvhBuilder.build(data.vertices, data.triangles);
     BvhBufferizer bvhBufferizer;
     data.bvhBufferData = bvhBufferizer.bufferize(bvh.get());
-
-    if (data.textures.empty())
-        data.textures.push_back(AppTextureManager::instance().getDefaultTexture());
 }
 
 int PathTracer::createBuffers(const BufferData& data) {
