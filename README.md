@@ -12,12 +12,67 @@
 
 ## Build
 
-CMake project (see `CMakeLists.txt`).
+Polarizer is a **cross-platform** CMake project targeting **Windows** and **Linux**.
+
+### Requirements
+
+- **CMake ≥ 3.15**
+- A **C++17** compiler
+  - Windows: Visual Studio (MSVC) recommended
+  - Linux: GCC or Clang
+- **Vulkan headers/libs** (recommended)
+  - The project can use a Vulkan SDK installed system-wide, or a vendored SDK path (see below).
+- GPU drivers supporting:
+  - **Vulkan** compute (recommended path; the app config defaults to Vulkan)
+  - and/or **OpenGL** (there is an OpenGL backend as well)
+
+### Third-party dependencies
+
+Most dependencies are expected under `third_party/` and are wired by `CMakeLists.txt`, including:
+- GLFW
+- glad
+- ImGui
+- stb
+- tinyfiledialogs
+- nlohmann/json (header-only)
+
+### Vulkan SDK path
+
+`CMakeLists.txt` uses `VULKAN_SDK_PATH` to locate Vulkan headers/libraries:
+- If `VULKAN_SDK_PATH` is **not** set, it defaults to: `third_party/vulkan`.
+
+If you have an installed Vulkan SDK, point CMake at it, e.g.:
+
+```bash
+cmake -S . -B build -DVULKAN_SDK_PATH="C:/VulkanSDK/1.xx.x.x"   # Windows example
+# or
+cmake -S . -B build -DVULKAN_SDK_PATH="$VULKAN_SDK"            # Linux example
+```
+
+### Build commands
+
+#### Windows (Visual Studio)
+
+```powershell
+cmake -S . -B build -G "Visual Studio 17 2022" -A x64
+cmake --build build --config Release
+```
+
+Artifacts are placed under:
+- `build/bin` (executables)
+- `build/lib` (libraries)
+
+#### Linux (Makefiles / Ninja)
 
 ```bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build --config Release
+cmake --build build -j
 ```
+
+### Notes / troubleshooting
+
+- If you see missing Vulkan headers/libs at configure time, set `VULKAN_SDK_PATH` (or ensure the vendored `third_party/vulkan` is present).
+- If Vulkan is not available on your system, you may still be able to run with the OpenGL backend (the repo contains both backends), but Vulkan is the default in app initialization.
 
 ---
 
@@ -35,7 +90,7 @@ Drag & drop:
 
 ---
 
-## UI overview (quick)
+## UI overview
 
 The main application is `PathTracerApp` (`inc/app/PathTracerApp.h`, `src/app/PathTracerApp.cpp`). The main window is composed of:
 
@@ -55,7 +110,7 @@ Strings are localized via JSON in `resources/strings/en_US.json` and `resources/
 
 ---
 
-## Scene files: `*.pls` (what they contain)
+## Scene files: `*.pls`
 
 A `*.pls` file is a binary dump of the custom DB:
 - Magic: `P L S`
@@ -72,7 +127,7 @@ Opening a scene resets the DB, loads it from file, validates the root `PtScene`,
 
 ---
 
-## Polarization theory (as implemented)
+## Polarization theory
 
 Polarization is implemented inside the path tracing compute shader (`resources/shaders/pathTracer.comp`), using:
 
@@ -85,7 +140,7 @@ This is intended to model how polarization state changes through specular-like i
 
 ---
 
-## Module map (brief)
+## Module map
 
 This repo is organized as several mostly-independent modules. Here’s a high-level map of what each does:
 
