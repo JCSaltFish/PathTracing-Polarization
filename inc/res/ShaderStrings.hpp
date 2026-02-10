@@ -8,8 +8,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace ShaderStrings
-{
+namespace ShaderStrings {
 
 // Source: pathTracer.comp
 inline constexpr const char* PATHTRACER_COMP =

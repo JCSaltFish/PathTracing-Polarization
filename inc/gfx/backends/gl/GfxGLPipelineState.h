@@ -12,8 +12,7 @@
 /**
  * @brief OpenGL implementation of GfxPipelineStateMachine.
  */
-class GfxGLPipelineStateMachine : public GfxPipelineStateMachine_T
-{
+class GfxGLPipelineStateMachine : public GfxPipelineStateMachine_T {
 public:
     void setViewport(const GfxViewport& viewport) override;
     void setScissor(const GfxRect& scissor) override;

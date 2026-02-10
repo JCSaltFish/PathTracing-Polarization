@@ -12,8 +12,7 @@
 /**
  * @brief Converts Gfx types to OpenGL types.
  */
-class GfxGLTypeConverter
-{
+class GfxGLTypeConverter {
 public:
     /**
      * @brief Converts GfxFormat to OpenGL internal format.

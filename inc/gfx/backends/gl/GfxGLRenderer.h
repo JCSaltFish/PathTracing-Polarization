@@ -12,13 +12,11 @@
  /**
   * @brief OpenGL implementation of GfxImage.
   */
-class GfxGLImage : public GfxImage_T
-{
+class GfxGLImage : public GfxImage_T {
 public:
     explicit GfxGLImage(const GfxImageInfo& info) :
         GfxImage_T(info)
-    {
-    };
+    {};
 
 public:
     GLuint m_texture = 0; // OpenGL texture object
@@ -28,17 +26,14 @@ public:
 /**
  * @brief OpenGL implementation of GfxRenderPass.
  */
-class GfxGLRenderPass : public GfxRenderPass_T
-{
+class GfxGLRenderPass : public GfxRenderPass_T {
 public:
-    GfxGLRenderPass
-    (
+    GfxGLRenderPass(
         const std::vector<GfxAttachment>& colorAttachments,
         const GfxAttachment& depthAttachment
     ) :
         GfxRenderPass_T(colorAttachments, depthAttachment)
-    {
-    };
+    {};
 
 public:
     GLuint m_fbo = 0; // OpenGL framebuffer object
@@ -49,18 +44,15 @@ public:
 /**
  * @brief OpenGL implementation of GfxBuffer.
  */
-class GfxGLBuffer : public GfxBuffer_T
-{
+class GfxGLBuffer : public GfxBuffer_T {
 public:
-    GfxGLBuffer
-    (
+    GfxGLBuffer(
         int size,
         GfxBufferUsage usage,
         GfxBufferProp prop
     ) :
         GfxBuffer_T(size, usage, prop)
-    {
-    };
+    {};
 
     void setSize(int size) { m_size = size; };
 
@@ -71,18 +63,15 @@ public:
 /**
  * @brief OpenGL implementation of GfxVAO.
  */
-class GfxGLVAO : public GfxVAO_T
-{
+class GfxGLVAO : public GfxVAO_T {
 public:
-    GfxGLVAO
-    (
+    GfxGLVAO(
         const GfxVertexDesc& vertexDesc,
         const GfxBuffer& vertexBuffer,
         const GfxBuffer& indexBuffer
     ) :
         GfxVAO_T(vertexDesc, vertexBuffer, indexBuffer)
-    {
-    };
+    {};
 
 public:
     GLuint m_vao = 0; // OpenGL Vertex Array Object
@@ -91,8 +80,7 @@ public:
 /**
  * @brief OpenGL implementation of GfxShader.
  */
-class GfxGLShader : public GfxShader_T
-{
+class GfxGLShader : public GfxShader_T {
 public:
     explicit GfxGLShader(GfxShaderStage stage) : GfxShader_T(stage) {};
 
@@ -103,18 +91,15 @@ public:
 /**
  * @brief OpenGL implementation of GfxDescriptorSetBinding.
  */
-class GfxGLDescriptorSetBinding : public GfxDescriptorSetBinding_T
-{
+class GfxGLDescriptorSetBinding : public GfxDescriptorSetBinding_T {
 public:
-    GfxGLDescriptorSetBinding
-    (
+    GfxGLDescriptorSetBinding(
         const GfxPipeline& pipeline,
         int descriptorSetIndex,
         const std::vector<GfxDescriptorBinding>& bindings
     ) :
         GfxDescriptorSetBinding_T(pipeline, descriptorSetIndex, bindings)
-    {
-    };
+    {};
 
 public:
     // Map of binding index to OpenGL SSBO for bindless textures
@@ -124,18 +109,15 @@ public:
 /**
  * @brief OpenGL implementation of GfxPipeline.
  */
-class GfxGLPipeline : public GfxPipeline_T
-{
+class GfxGLPipeline : public GfxPipeline_T {
 public:
-    GfxGLPipeline
-    (
+    GfxGLPipeline(
         const GfxRenderPass& renderPass,
         const std::vector<GfxDescriptorSet>& descriptorSets,
         const std::vector<GfxPipelineState>& dynamicStates
     ) :
         GfxPipeline_T(renderPass, descriptorSets, dynamicStates)
-    {
-    };
+    {};
 
 public:
     GLuint m_program = 0; // OpenGL program object
@@ -144,8 +126,7 @@ public:
 /**
  * @brief OpenGL implementation of GfxRenderer.
  */
-class GfxGLRenderer : public GfxRendererInterface
-{
+class GfxGLRenderer : public GfxRendererInterface {
 public:
     GfxGLRenderer();
     ~GfxGLRenderer() = default;
@@ -170,69 +151,60 @@ public:
     void copyImage(const GfxImage& src, const GfxImage& dst, int width, int height) override;
     void destroyImage(const GfxImage& image) const override;
 
-    GfxRenderPass createRenderPass
-    (
+    GfxRenderPass createRenderPass(
         const std::vector<GfxAttachment>& colorAttachments,
         const GfxAttachment& depthAttachment
     ) const override;
     void destroyRenderPass(const GfxRenderPass& renderPass) const override;
 
-    GfxFramebuffer createFramebuffer
-    (
+    GfxFramebuffer createFramebuffer(
         const GfxRenderPass& renderPass,
         const std::vector<GfxImage>& colorImages,
         const GfxImage& depthImage,
         const std::vector<GfxImage>& colorResolveImages
     ) const override;
     void destroyFramebuffer(const GfxFramebuffer& framebuffer) const override {};
-    int readFramebufferColorAttachmentPixels
-    (
+    int readFramebufferColorAttachmentPixels(
         const GfxFramebuffer& framebuffer,
         int index,
         const GfxRect& rect,
         void* pixels
     ) const override;
 
-    GfxBuffer createBuffer
-    (
+    GfxBuffer createBuffer(
         int size,
         GfxBufferUsage usage,
         GfxBufferProp prop
     ) const override;
     int setBufferData(const GfxBuffer& buffer, int size, const void* data) const override;
-    int updateBufferData
-    (
+    int updateBufferData(
         const GfxBuffer& buffer,
         int offset,
         int size,
         const void* data
     ) const override;
     void destroyBuffer(const GfxBuffer& buffer) const override;
-    int readBufferData
-    (
+    int readBufferData(
         const GfxBuffer& buffer,
         int offset,
         int size,
         void* data
     ) const override;
 
-    GfxVAO createVAO
-    (
+    GfxVAO createVAO(
         const GfxVertexDesc& vertexDesc,
         const GfxBuffer& vertexBuffer,
         const GfxBuffer& indexBuffer
     ) const override;
     void destroyVAO(const GfxVAO& vao) const override;
 
-    GfxShader createShader
-    (
+    GfxShader createShader(
         GfxShaderStage stage,
         const std::string& source
     ) const override;
     void destroyShader(const GfxShader& shader) const override;
 
-    GfxPipeline createPipeline
-    (
+    GfxPipeline createPipeline(
         const std::vector<GfxShader>& shaders,
         const std::vector<GfxDescriptorSet>& descriptorSets,
         const GfxVertexDesc& vertexDesc,
@@ -241,8 +213,7 @@ public:
     ) const override;
     void destroyPipeline(const GfxPipeline& pipeline) const override;
 
-    GfxDescriptorSetBinding createDescriptorSetBinding
-    (
+    GfxDescriptorSetBinding createDescriptorSetBinding(
         const GfxPipeline& pipeline,
         int descriptorSetIndex,
         const std::vector<GfxDescriptorBinding>& bindings
@@ -265,23 +236,20 @@ public:
     int endFrame() override { return 0; };
 
     void draw(int nVertices, int nInstances, int firstVertex, int firstInstance) override;
-    void drawIndexed
-    (
+    void drawIndexed(
         int nIndices,
         int nInstances,
         int firstIndex,
         int vertexOffset,
         int firstInstance
     ) override;
-    void drawIndirect
-    (
+    void drawIndirect(
         const GfxBuffer& buffer,
         int offset,
         int drawCount,
         int stride
     ) override;
-    void drawIndexedIndirect
-    (
+    void drawIndexedIndirect(
         const GfxBuffer& buffer,
         int offset,
         int drawCount,

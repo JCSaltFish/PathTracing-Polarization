@@ -18,7 +18,7 @@ set(HPP_CONTENT "${HPP_CONTENT}#pragma once\n\n")
 set(HPP_CONTENT "${HPP_CONTENT}#include <string>\n")
 set(HPP_CONTENT "${HPP_CONTENT}#include <unordered_map>\n\n")
 
-set(HPP_CONTENT "${HPP_CONTENT}namespace ShaderStrings\n{\n\n")
+set(HPP_CONTENT "${HPP_CONTENT}namespace ShaderStrings {\n\n")
 
 foreach(SHADER_FILE ${SHADER_FILES})
     string(MAKE_C_IDENTIFIER "${SHADER_FILE}" VAR_NAME)

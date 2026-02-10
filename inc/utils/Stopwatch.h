@@ -7,9 +7,9 @@
 
 #pragma once
 
- /**
-  * @brief Class for measuring elapsed time.
-  */
+/**
+ * @brief Class for measuring elapsed time.
+ */
 class Stopwatch {
 public:
     /**

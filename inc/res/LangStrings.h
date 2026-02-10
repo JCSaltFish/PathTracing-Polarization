@@ -7,8 +7,7 @@
 
 #include <string>
 
-namespace LangStrings
-{
+namespace LangStrings {
 
 /**
  * @brief Enumeration of supported languages.
