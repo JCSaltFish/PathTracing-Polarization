@@ -110,6 +110,54 @@ Strings are localized via JSON in `resources/strings/en_US.json` and `resources/
 
 ---
 
+## Output channels and export formats
+
+Polarizer’s path tracer produces a 4-channel per-pixel output (`vec4` in the shader / `RGBA32F` images on the GPU). In **polarization mode**, the channels are used as:
+
+- **R = S0**
+- **G = S1**
+- **B = S2**
+- **A = Scene depth** (a scalar depth value written by the tracer)
+
+### What are (S0, S1, S2) here?
+
+In the shader, polarization is represented with a **3-component Stokes-like vector**:
+
+- `S = (S0, S1, S2)`
+
+This is similar in spirit to the classical Stokes vector, but **reduced to 3 components** (classical Stokes is 4D: `S0..S3`). In this implementation:
+
+- `S0` acts like an overall intensity-like term.
+- `S1` and `S2` encode linear polarization components in a chosen local frame.
+- The vector is rotated between interaction frames using a Stokes-rotation matrix (`stokesRotation(phi)`), and updated using Fresnel s/p coefficients accumulated along the path (`calcPolarResult`).
+
+> Practical interpretation: treat `(S0,S1,S2)` as “the polarization result the shader computes” rather than assuming it matches every convention of a full 4D Stokes pipeline.
+
+### Displaying channels
+
+The UI includes a display channel selector for the path tracer output (see `UiRightPanel::OUTPUT_DISP_CHANNEL` handling). This lets you visualize individual components (e.g. S0 only) in the viewport via the post-processing step.
+
+### Exporting
+
+Polarizer supports exporting:
+- **Text export** that writes floating point channel data to a `.txt`
+
+From the implementation, the text export writes **all float channels** in a structured way:
+- Channels are exported as separate planes (one plane per channel).
+- Each plane is written row-by-row, as space-separated float values.
+
+In polarization output mode, that means the exported text contains **four planes** in this order:
+
+1. `S0` plane
+2. `S1` plane
+3. `S2` plane
+4. `SceneDepth` plane
+
+So a consumer can reconstruct:
+- a `(width × height)` array for `S0`, `S1`, `S2`, and `depth`.
+
+---
+
 ## Scene files: `*.pls`
 
 A `*.pls` file is a binary dump of the custom DB:
