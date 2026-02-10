@@ -106,7 +106,7 @@ Keyboard/mouse highlights:
 - **Shift+1 / Shift+2** switches display mode (Preview / Path tracer output).
 - **F5/F6/F7/F8** map to render Start/Pause/Stop/Restart (see `onKeyboardAction`).
 
-Strings are localized via JSON in `resources/strings/en_US.json` and `resources/strings/zh_CN.json`.
+Strings are localized via JSON in `resources/strings/`.
 
 ---
 

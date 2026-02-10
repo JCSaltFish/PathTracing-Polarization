@@ -46,7 +46,7 @@ public:
 
     /**
      * @brief Set the display channel for the output image.
-     * @param channel The display channel to set (0: RGB, 1: R, 2: G, 3: B, 4: A).
+     * @param channel The display channel to set (0: S0, 1: S1, 2: S2).
      */
     void setDisplayChannel(int channel);
 
@@ -81,5 +81,5 @@ private:
     int m_resolutionX = 0; // Horizontal resolution
     int m_resolutionY = 0; // Vertical resolution
 
-    int m_dispChannel = 0; // Display channel (0: RGB, 1: R, 2: G, 3: B, 4: A)
+    int m_dispChannel = 0; // Display channel (0: S0, 1: S1, 2: S2)
 };

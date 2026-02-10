@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <atomic>
-
 #include "utils/Mesh.h"
 #include "gfx/GfxPub.h"
 #include "app/AppDataManager.h"
