@@ -912,6 +912,8 @@ int PathTracerApp::loadNewScene(const std::string& filename) {
         Logger() << "Failed to load scene into previewer";
         return 1;
     }
+    m_modelUiListItemLookUp.clear();
+    m_meshUiListItemLookUp.clear();
     updateUiRightPanel({ hScene });
     m_rightPanel->modelListView.clear();
     if (!filename.empty()) {
